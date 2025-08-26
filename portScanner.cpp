@@ -3,6 +3,7 @@ using namespace std;
 
 int main() {
     int a = 5;
-    std::cout << std::boolalpha;
-    std:: cout << (a + 3 == 8);
+    for (int i = 0; i < 5; i++) {
+    cout << i << "\n";
+    }
 }
