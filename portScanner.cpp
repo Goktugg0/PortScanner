@@ -1,6 +1,8 @@
 #include <iostream>
 using namespace std;
-
+// Trying for a function creation
+bool scanPort(const char* ip, int port) {
+}
 int main() {
     int a = 5;
     for (int i = 0; i < 5; i++) {
