@@ -1,4 +1,6 @@
 #include <iostream>
+#include <sys/socket.h>
+"""will do system socket access"""
 using namespace std;
 // Trying for a function creation
 bool scanPort(const char* ip, int port) {
