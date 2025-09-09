@@ -1,14 +1,20 @@
 #include <iostream>
+#include <string>
 using namespace std;
 
+
+void portOpen() {
+    cout << "I just got executed!";
+}
+
 int main() {
-    int a = 5;
-    for (int i = 0; i < 5; i++) {
-    cout << i << "\n";
+    
+    std::string IP = "192.168.1.1"; // Example IP
+    int startPort = 1;
+    int endPort = 65536;
+    
+    for (int i = startPort; i < endPort; i++) {
+        cout << i << "\n";
     }
 
-    int x; 
-    cout << "Type a number: "; // Type a number and press enter
-    cin >> x; // Get user input from the keyboard
-    cout << "Your number is: " << x; // Display the input value
 }
