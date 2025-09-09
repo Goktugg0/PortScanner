@@ -8,7 +8,7 @@ void scanPort(std::string ip, int port) {
 
 
 int main() {
-    """Test commits for my account because it was not working """;
+    """Test commits for my account because it was not working with my github account""";
     std::string IP = "192.168.1.1"; // Example IP
     int startPort = 1;
     int endPort = 65536;
