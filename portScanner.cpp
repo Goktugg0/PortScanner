@@ -1,11 +1,10 @@
 #include <iostream>
-#include <string>
 using namespace std;
 
-
-void portOpen() {
-    cout << "I just got executed!";
+void scanPort(std::string ip, int port) {
+    cout << "Port " << port << " is OPEN \n";
 }
+
 
 int main() {
     
@@ -13,8 +12,8 @@ int main() {
     int startPort = 1;
     int endPort = 65536;
     
-    for (int i = startPort; i < endPort; i++) {
-        cout << i << "\n";
+    for (int currPort = startPort; currPort < endPort; currPort++) {
+        scanPort(IP, currPort);
     }
 
 }
