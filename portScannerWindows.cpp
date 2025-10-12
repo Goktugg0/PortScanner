@@ -1,0 +1,20 @@
+#include <iostream>
+using namespace std;
+
+void scanPort(std::string ip, int port) {
+    cout << "Port " << port << " is OPEN \n";
+    // Actual port scanning
+}
+
+
+int main() {
+    """Test commits one more time and yes it is working""";
+    std::string IP = "127.0.0.1"; // Example IP
+    int startPort = 1;
+    int endPort = 65536;
+    
+    for (int currPort = startPort; currPort < endPort; currPort++) {
+        scanPort(IP, currPort);
+    }
+
+}
