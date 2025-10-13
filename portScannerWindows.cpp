@@ -6,7 +6,19 @@ using namespace std;
 #include <ws2tcpip.h>
 #include <stdio.h>
 
-bool scanPort(std::string ip, int port) {
+bool scanPort(std::string ip, int port, int timeOut) {
+
+    SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (sock == INVALID_SOCKET) {
+        std:: cerr << "Error at socket ";
+        return false;
+    }
+
+    SOCKADDR_IN skt;
+    ZeroMemory(&skt, sizeof(skt));
+    skt.sin_family = AF_INET;
+    skt.sin_port = htons(port);
+
     cout << "Port " << port << " is OPEN \n";
     // Actual port scanning
 }
@@ -44,7 +56,7 @@ int main(int argc, char* argv[]) {
         startPort << "to" << endPort << "with timeout " << timeOut;
 
     for (int currPort = startPort; currPort < endPort; currPort++) {
-        if (scanPort(IP, currPort)) {
+        if (scanPort(IP, currPort, timeOut)) {
             std:: cout << "Port number " << currPort << "is open \n";
         }
     }
