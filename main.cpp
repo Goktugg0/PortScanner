@@ -1,10 +1,10 @@
 #include <iostream>
 #include <string>
-// #include <chrono> will be added later for RTTs
-#include <cstring> // c memory utilities
+#include <chrono> // for RTTs
 using namespace std;
 
 #ifdef _WIN32
+    #define _WIN32_WINNT 0x0600
     #include <winsock2.h>
     #include <ws2tcpip.h> // to convert IPs
     #pragma comment(lib, "ws2_32.lib") // Winsock for Windows
@@ -13,7 +13,7 @@ using namespace std;
     using socket_handle_t = SOCKET; // Creates a unified type alias
     #define CLOSE_SOCKET(s) closesocket(s)
     #define IS_INVALID_SOCKET(s) ((s) == INVALID_SOCKET)
-    #define WOULD_BLOCK (WSAGetLastError() == WSAEWOULDBLOCK)
+    #define IS_IN_PROGRESS (WSAGetLastError() == WSAEWOULDBLOCK)
 #else
     #include <sys/socket.h>
     #include <arpa/inet.h> // translation of IPs
@@ -28,7 +28,7 @@ using namespace std;
     #define SOCKET_ERROR -1
     #define CLOSE_SOCKET(s) close(s)
     #define IS_INVALID_SOCKET(s) ((s) < 0)
-    #define WOULD_BLOCK (errno == EINPROGRESS)
+    #define IS_IN_PROGRESS (errno == EINPROGRESS)
 #endif
 
 bool initializeNetwork() {
@@ -65,7 +65,7 @@ bool createNonBlockingCon(socket_handle_t socket) {
         if (flags == -1) {
             return false;
         } else {
-            return fcntl(sock, F_SETFL, flags | O_NONBLOCK) == 0;
+            return fcntl(socket, F_SETFL, flags | O_NONBLOCK) == 0;
         }
     #endif
 }
@@ -75,8 +75,47 @@ struct ScanResult {
     int rtt;
 };
 
-bool scanPort() {
-    return true;
+// preventing function caller to modify the reference with const
+ScanResult scanPort(const std::string& ip, int port, int timeout) {
+    ScanResult result = {false, 0};
+    // creating a network socket, for TCP 
+    socket_handle_t sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); 
+
+    if (IS_INVALID_SOCKET(sock)) {
+        std :: cerr << "Socket is invalid!";
+        return result;
+    }
+
+    if (!createNonBlockingCon(sock)) {
+        std :: cerr << "Couldn't create non Blocking connection for " << port;
+        CLOSE_SOCKET(sock);
+        return result;
+    }
+
+    // declearing empty socket
+    sockaddr_in skt = {};
+    skt.sin_family = AF_INET;
+    skt.sin_port = htons(port); // reverses the byte ordering for Networks
+    // add the IP to the addres of the socket
+    unsigned long addr = inet_addr(ip.c_str());
+    if (addr == INADDR_NONE) { // check whether its valid
+        CLOSE_SOCKET(sock);
+        return result; // Invalid IP string
+    }
+    skt.sin_addr.s_addr = addr;
+
+    //start the timer
+    auto start = std::chrono::high_resolution_clock::now();
+    int connection_result = connect(sock, (sockaddr*)&skt, sizeof(skt));
+    if (connection_result == SOCKET_ERROR) {
+        if (!IS_IN_PROGRESS) {
+            CLOSE_SOCKET(sock); // close socket on system failures
+            return result;
+        }
+    }
+
+    
+
 }
 
 int main(int argc, char* argv[]) {
@@ -91,7 +130,7 @@ int main(int argc, char* argv[]) {
         IP = argv[1];
     }
     if (argc >= 3) {
-        startPort = std::stoi(argv[2]);
+        startPort = std::stoi(argv[2]); // instead of atoi it throws an error right away if its not a number
     }
     if (argc >= 4) {
         endPort = std::stoi(argv[3]);
