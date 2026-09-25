@@ -70,3 +70,56 @@ bool createNonBlockingCon(socket_handle_t socket) {
     #endif
 }
 
+struct ScanResult {
+    bool isOpen;
+    int rtt;
+};
+
+bool scanPort() {
+    return true;
+}
+
+int main(int argc, char* argv[]) {
+
+    std::string IP = "127.0.0.1"; // local IP
+    // Default values
+    int startPort = 1;
+    int endPort = 1024;
+    int timeOut = 200; // ms
+
+    if (argc >= 2) {
+        IP = argv[1];
+    }
+    if (argc >= 3) {
+        startPort = std::stoi(argv[2]);
+    }
+    if (argc >= 4) {
+        endPort = std::stoi(argv[3]);
+    }
+    if (argc >= 5) {
+        timeOut = std::stoi(argv[4]);
+    }
+
+    if (!initializeNetwork()) {
+        std:: cerr << "Network Initialization failed \n";
+        return -1;
+    }
+
+    std:: cout << "Starting scanning on " << IP << "from port number" <<
+        startPort << "to" << endPort << "with timeout " << timeOut << "ms...\n\n";
+
+    for (int currPort = startPort; currPort < endPort; currPort++) {
+        ScanResult result = scanPort(IP, currPort, timeOut);
+        if (result.isOpen) {
+            std:: cout << "Port " << currPort << " is OPEN. Handshake RTT: " << result.rtt << " ms \n";
+        } else {
+            std:: cout << "Port " << currPort << " is CLOSED.";
+        }    
+    }
+
+    std::cout << "\n Scan is Complete! \n";
+
+    cleanupNetwork();
+
+    return 0;
+}
