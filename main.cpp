@@ -72,7 +72,7 @@ bool createNonBlockingCon(socket_handle_t socket) {
 
 struct ScanResult {
     bool isOpen;
-    int rtt;
+    double rtt;
 };
 
 // preventing function caller to modify the reference with const
@@ -105,7 +105,7 @@ ScanResult scanPort(const std::string& ip, int port, int timeout) {
     skt.sin_addr.s_addr = addr;
 
     //start the timer
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start_time = std::chrono::high_resolution_clock::now();
     int connection_result = connect(sock, (sockaddr*)&skt, sizeof(skt));
     if (connection_result == SOCKET_ERROR) {
         if (!IS_IN_PROGRESS) {
@@ -113,8 +113,27 @@ ScanResult scanPort(const std::string& ip, int port, int timeout) {
             return result;
         }
     }
+    // create file descripter for the select()
+    fd_set fd_write;
+    FD_ZERO(&fd_write);
+    FD_SET(sock, &fd_write);
 
-    
+    // convert timeout timeval for select() 
+    timeval tv;
+    tv.tv_sec = timeout / 1000;
+    tv.tv_usec = (timeout % 1000) * 1000;
+
+    int num_of_selection = select((int)sock, nullptr, &fd_write, nullptr, &tv) > 0;
+    // if there are more than one selection in the written file descriptor and 
+    if (num_of_selection > 0 && FD_ISSET(sock, &fd_write)) {
+
+        auto end_time = std::chrono::high_resolution_clock::now();
+        result.isOpen = true;
+        result.rtt = std::chrono::duration<float, std::milli>(end_time - start_time).count();
+    }
+
+    CLOSE_SOCKET(sock);
+    return result;
 
 }
 
