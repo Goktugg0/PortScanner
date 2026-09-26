@@ -173,7 +173,7 @@ int main(int argc, char* argv[]) {
     std:: cout << "Starting scanning on " << IP << " from port number " <<
         startPort << " to " << endPort << " with timeout " << timeOut << "ms...\n\n";
 
-    for (int currPort = startPort; currPort < endPort; currPort++) {
+    for (int currPort = startPort; currPort <= endPort; currPort++) {
         ScanResult result = scanPort(IP, currPort, timeOut);
         if (result.isOpen) {
             std:: cout << "Port " << currPort << " is OPEN. Handshake RTT: " << result.rtt << " ms \n";
