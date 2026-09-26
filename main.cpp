@@ -4,7 +4,6 @@
 using namespace std;
 
 #ifdef _WIN32
-    #define _WIN32_WINNT 0x0600
     #include <winsock2.h>
     #include <ws2tcpip.h> // to convert IPs
     #pragma comment(lib, "ws2_32.lib") // Winsock for Windows
@@ -124,12 +123,19 @@ ScanResult scanPort(const std::string& ip, int port, int timeout) {
     tv.tv_usec = (timeout % 1000) * 1000;
 
     int num_of_selection = select((int)sock, nullptr, &fd_write, nullptr, &tv) > 0;
-    // if there are more than one selection in the written file descriptor and 
+    // if there are more than one selection in the written file descriptor
     if (num_of_selection > 0 && FD_ISSET(sock, &fd_write)) {
+        int error_num = 0;
+        socklen_t len = sizeof(error_num);
+        #ifdef _WIN32
+            getsockopt(sock, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&error_num), &len);
+        #else 
+            getsockopt(sock, SOL_SOCKET, SO_ERROR, &error_num, &len);
+        #endif
 
         auto end_time = std::chrono::high_resolution_clock::now();
         result.isOpen = true;
-        result.rtt = std::chrono::duration<float, std::milli>(end_time - start_time).count();
+        result.rtt = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
     }
 
     CLOSE_SOCKET(sock);
@@ -139,7 +145,7 @@ ScanResult scanPort(const std::string& ip, int port, int timeout) {
 
 int main(int argc, char* argv[]) {
 
-    std::string IP = "127.0.0.1"; // local IP
+    std::string IP = "127.0.0.0"; // local IP
     // Default values
     int startPort = 1;
     int endPort = 1024;
@@ -163,15 +169,15 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    std:: cout << "Starting scanning on " << IP << "from port number" <<
-        startPort << "to" << endPort << "with timeout " << timeOut << "ms...\n\n";
+    std:: cout << "Starting scanning on " << IP << " from port number " <<
+        startPort << " to " << endPort << " with timeout " << timeOut << "ms...\n\n";
 
     for (int currPort = startPort; currPort < endPort; currPort++) {
         ScanResult result = scanPort(IP, currPort, timeOut);
         if (result.isOpen) {
             std:: cout << "Port " << currPort << " is OPEN. Handshake RTT: " << result.rtt << " ms \n";
         } else {
-            std:: cout << "Port " << currPort << " is CLOSED.";
+            std:: cout << "Port " << currPort << " is CLOSED. \n";
         }    
     }
 
