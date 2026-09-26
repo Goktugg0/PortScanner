@@ -122,7 +122,7 @@ ScanResult scanPort(const std::string& ip, int port, int timeout) {
     tv.tv_sec = timeout / 1000;
     tv.tv_usec = (timeout % 1000) * 1000;
 
-    int num_of_selection = select((int)sock, nullptr, &fd_write, nullptr, &tv) > 0;
+    int num_of_selection = select((int)sock + 1, nullptr, &fd_write, nullptr, &tv) > 0;
     // if there are more than one selection in the written file descriptor
     if (num_of_selection > 0 && FD_ISSET(sock, &fd_write)) {
         int error_num = 0;
@@ -132,10 +132,11 @@ ScanResult scanPort(const std::string& ip, int port, int timeout) {
         #else 
             getsockopt(sock, SOL_SOCKET, SO_ERROR, &error_num, &len);
         #endif
-
-        auto end_time = std::chrono::high_resolution_clock::now();
+        if (error_num == 0) {
         result.isOpen = true;
+        auto end_time = std::chrono::high_resolution_clock::now();
         result.rtt = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+        }
     }
 
     CLOSE_SOCKET(sock);
