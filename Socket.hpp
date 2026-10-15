@@ -10,7 +10,21 @@ struct Socket {
     ~Socket() { reset(); }
 
     Socket(const Socket&) = delete;            // bans copying a constructor
+
+    // When a socket is being created place to another socket
+    Socket(Socket&& other) noexcept : fd(other.release()) {} // Move Constructor
+
     Socket& operator=(const Socket&) = delete; // Bans overwriting an open socket
+
+    // It moves the current socket fd and reset the other
+    // So when other is closed it does not close the new socket
+    Socket& operator=(Socket&& other) noexcept {
+    if (this != &other) {
+        reset();
+        fd = other.release();
+    }
+    return *this;
+    }
 
     void reset() { 
         if (fd >= 0) {
