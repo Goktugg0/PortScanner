@@ -2,6 +2,7 @@
 #include <string>
 #include <chrono> // for RTTs
 using namespace std;
+#include "asyncScanner.hpp"
 
 #ifdef _WIN32
     #include <winsock2.h>

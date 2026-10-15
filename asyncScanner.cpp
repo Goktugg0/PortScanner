@@ -15,6 +15,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <cerrno>
+#include "asyncScanner.hpp"
 
 // set an anon namespace to prevent conflicts with different classes
 namespace {
