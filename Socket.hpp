@@ -9,6 +9,9 @@ struct Socket {
     explicit Socket(int num) : fd(num) {} // directly initalize fd without overwrite (excplicit to ban implicit conversion)
     ~Socket() { reset(); }
 
+    Socket(const Socket&) = delete;            // bans copying a constructor
+    Socket& operator=(const Socket&) = delete; // Bans overwriting an open socket
+
     void reset() { 
         if (fd >= 0) {
             close(fd);

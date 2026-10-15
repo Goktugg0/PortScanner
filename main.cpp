@@ -147,7 +147,7 @@ ScanResult scanPort(const std::string& ip, int port, int timeout) {
 
 int main(int argc, char* argv[]) {
 
-    std::string IP = "127.0.0.0"; // local IP
+    std::string IP = "127.0.0.1"; // local IP
     // Default values
     int startPort = 1;
     int endPort = 1024;
